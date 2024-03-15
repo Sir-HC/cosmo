@@ -151,7 +151,7 @@ Win32InitDSound(HWND Window, int32 SamplesPerSecond, int32 BufferSize){
 			}
 			DSBUFFERDESC BufferDescription = {};
 			BufferDescription.dwSize = sizeof(BufferDescription);
-			BufferDescription.dwFlags = 0;
+			BufferDescription.dwFlags = DSBCAPS_GETCURRENTPOSITION2;
 			BufferDescription.dwBufferBytes = BufferSize;
 			BufferDescription.lpwfxFormat = &WaveFormat;
 
@@ -471,6 +471,26 @@ Win32GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End){
 	return(Result);
 }
 
+internal void Win32DebugDrawVertical(win32_offscreen_buffer *GlobalBackbuffer, int X, int Top, int Bottom, uint32 Color) {
+	uint8 *Pixel = ((uint8 *)GlobalBackbuffer->Memory + X*GlobalBackbuffer->BytesPerPixel + Top*GlobalBackbuffer->Pitch);
+	for(int Y = Top; Y < Bottom; ++Y){
+		*(uint32 *)Pixel = Color;
+		Pixel += GlobalBackbuffer->Pitch;
+	}
+}
+
+internal void
+Win32DebugSyncDisplay(win32_offscreen_buffer *GlobalBackbuffer, int LastPlayCursorCount, DWORD *LastPlayCursor, win32_sound_output *SoundOutput, real32 TargetSecondsPerFrame){
+	int PadX = 16;
+	int PadY = 16;
+	int Top = PadY;
+	int Bottom = GlobalBackbuffer->Height - PadY;
+	real32 C = ((real32)GlobalBackbuffer->Width - 2*PadX) / (real32)SoundOutput->SecondaryBufferSize;
+	for(int PlayCursorIndex = 0; PlayCursorIndex < LastPlayCursorCount ; ++PlayCursorIndex){
+		int X = PadX + (int)(C * (real32)LastPlayCursor[PlayCursorIndex]);
+		Win32DebugDrawVertical(GlobalBackbuffer, X, Top, Bottom, 0xFFFFFFFF);
+	}
+}
 
 int CALLBACK WinMain(HINSTANCE Instance,
 					 HINSTANCE PrevInstance,
@@ -495,8 +515,8 @@ int CALLBACK WinMain(HINSTANCE Instance,
 //	WindowClass.hIcon;
 	WindowClass.lpszClassName = "CosmoWindowClass";
 
-	int MonitorRefreshHz = 60;
-	int GameUpdateHz = MonitorRefreshHz / 2;
+#define MonitorRefreshHz 60
+#define GameUpdateHz (MonitorRefreshHz / 2)
 
 	real32 TargetSecondsPerFrame = 1.0f / (real32)GameUpdateHz;
 
@@ -505,7 +525,7 @@ int CALLBACK WinMain(HINSTANCE Instance,
 		HWND Window = CreateWindowExA(
 		  0,
 		  WindowClass.lpszClassName,
-		  "Cosmo",
+		  "Engine",
 		  WS_OVERLAPPEDWINDOW|WS_VISIBLE,
 		  CW_USEDEFAULT,
 		  CW_USEDEFAULT,
@@ -560,6 +580,9 @@ int CALLBACK WinMain(HINSTANCE Instance,
 				LARGE_INTEGER LastCounter = Win32GetWallClock();
 
 				int64 LastCycleCount = __rdtsc();
+
+				int DebugLastPlayCursorIndex = 0;
+				DWORD DebugLastPlayCursor[GameUpdateHz / 2]  = {0};
 				while(GlobalRunning){
 
 					game_controller_input *OldKeyboardController = GetController(OldInput, 0);
@@ -653,8 +676,6 @@ int CALLBACK WinMain(HINSTANCE Instance,
 						SoundIsValid = true;
 					}
 
-
-
 					game_sound_output_buffer SoundBuffer = {};
 					SoundBuffer.SamplesPerSecond = SoundOutput.SamplesPerSecond;
 					SoundBuffer.SampleCount = BytesToWrite / SoundOutput.BytesPerSample;
@@ -694,16 +715,33 @@ int CALLBACK WinMain(HINSTANCE Instance,
 					}
 					else{
 					}
+					LARGE_INTEGER EndCounter = Win32GetWallClock();
+					real32 MSPerFrame = (1000.0f*Win32GetSecondsElapsed(LastCounter, EndCounter));
+					LastCounter = EndCounter;
+
 					win32_window_dimension Dimension = Win32GetWindowDimension(Window);
+#if CORE_INTERNAL
+					Win32DebugSyncDisplay(&GlobalBackBuffer, ArrayCount(DebugLastPlayCursor), DebugLastPlayCursor, &SoundOutput, TargetSecondsPerFrame);
+#endif
 					Win32DisplayBufferToWindow(&GlobalBackBuffer, DeviceContext, Dimension);
+
+#if CORE_INTERNAL
+					{
+					  DWORD PlayCursor_;
+						DWORD WriteCursor_;
+						GlobalSecondaryBuffer->GetCurrentPosition(&PlayCursor_, &WriteCursor_);
+						DebugLastPlayCursor[DebugLastPlayCursorIndex++] = PlayCursor_;
+						if(DebugLastPlayCursorIndex > ArrayCount(DebugLastPlayCursor)){
+							DebugLastPlayCursorIndex = 0;
+						}
+					}
+#endif
 
 					game_input *Temp = NewInput;
 					NewInput = OldInput;
 					OldInput = Temp;
 
-					LARGE_INTEGER EndCounter = Win32GetWallClock();
-					real32 MSPerFrame = (1000.0f*Win32GetSecondsElapsed(LastCounter, EndCounter));
-					LastCounter = EndCounter;
+
 					real64 FPS = 0.0f;
 
 					int64 EndCycleCount = __rdtsc();

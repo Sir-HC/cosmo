@@ -21,7 +21,7 @@ struct win32_sound_output
 	int SamplesPerSecond;
 	uint32 RunningSampleIndex;
 	int BytesPerSample;
-	int SecondaryBufferSize;
+	DWORD SecondaryBufferSize;
 	int LatencySampleCount;
 	real32 tSine;
 };
