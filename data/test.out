@@ -2,22 +2,23 @@
 #include "core.h"
 
 internal void 
-GameOutputSound(game_state *GameState, game_sound_output_buffer *SoundBuffer, int ToneHz)
+GameOutputSound(game_sound_output_buffer *SoundBuffer, int ToneHz)
 {
+	local_persist real32 tSine;
 	int16 ToneVolume = 600;
 	int16* SampleOut = SoundBuffer->Samples;
 	
 	int WavePeriod = SoundBuffer->SamplesPerSecond / ToneHz;
 
 	for (int SampleIndex = 0; SampleIndex < SoundBuffer->SampleCount; ++SampleIndex) {
-		real32 SineValue = sinf(GameState->tSine);
+		real32 SineValue = sinf(tSine);
 		int16 SampleValue = (int16)(SineValue * ToneVolume);
 		*SampleOut++ = SampleValue;
 		*SampleOut++ = SampleValue;
 		
-		GameState->tSine += (real32)(2.0f * Pi32 * 1.0f) / (real32)WavePeriod;
-		if(GameState->tSine > 2.0f*Pi32){
-			GameState->tSine -= (real32)(2.0f*Pi32);
+		tSine += (real32)(2.0f * Pi32 * 1.0f) / (real32)WavePeriod;
+		if(tSine > 2.0f*Pi32){
+			tSine -= (real32)(2.0f*Pi32);
 		}
 	}
 }
@@ -38,29 +39,27 @@ RenderWeirdGradient(game_offscreen_buffer *Buffer, int BlueOffset, int GreenOffs
 			uint8 Blue = (uint8)(X+BlueOffset);
 			uint8 Green = (uint8)(Y+GreenOffset);
 			uint8 Red = (uint8)(X+Y);
-			*Pixel++ = (((Red << 8) | Green << 8) | Blue);
+			*Pixel++ = (((Red << 16) | Green << 8) | Blue);
 		}
 		Row += Buffer->Pitch;
 	}
 }
 
 
-extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender){
+internal void 
+GameUpdateAndRender(game_memory *Memory, game_input *Input, game_offscreen_buffer *Buffer){
 	Assert((&Input->Controllers[0].Terminator - &Input->Controllers[0].Buttons[0]) == (ArrayCount(Input->Controllers[0].Buttons)));
 	
 	game_state *GameState = (game_state *)Memory->PermanentStorage;
 	if(!Memory->IsInitilized){
-		/*
 		char *Filename = __FILE__;
-		debug_read_file_result File = Memory->DEBUGPlatformReadEntireFile(Filename);
+		debug_read_file_result File = DEBUGPlatformReadEntireFile(Filename);
 		if(File.Content){
-			Memory->DEBUGPlatformWriteEntireFile("test.out", File.ContentSize, File.Content);
-			Memory->DEBUGPlatformFreeFileMemory(File.Content);
-		}
-		*/		
+			DEBUGPlatformWriteEntireFile("test.out", File.ContentSize, File.Content);
+			DEBUGPlatformFreeFileMemory(File.Content);
+		}	
 		
 		GameState->ToneHz = 256; 
-		GameState->tSine = 0.0f;
 		Memory->IsInitilized = true;
 	}
 	
@@ -93,8 +92,10 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender){
 	RenderWeirdGradient(Buffer, GameState->BlueOffset, GameState->GreenOffset);
 }
 
-extern "C" GAME_GET_SOUND_SAMPLES(GameGetSoundSamples){
+internal void
+GameGetSoundSamples(game_memory *Memory, game_sound_output_buffer *SoundBuffer){
+
 	game_state *GameState = (game_state *)Memory->PermanentStorage;
-	GameOutputSound(GameState, SoundBuffer, GameState->ToneHz);
+	GameOutputSound(SoundBuffer, GameState->ToneHz);
 }
 
