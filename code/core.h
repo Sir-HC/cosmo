@@ -63,19 +63,11 @@ struct canonical_position {
 	real32 Y;
 };
 
-struct raw_position {
-	int32 TileMapX;
-	int32 TileMapY;
-	
-	// x/y from map
-	real32 X;
-	real32 Y;
-};
-
 struct world{
 	
 	real32 TileSideInMeters;
 	int32 TileSideInPixels; 
+	real32 MetersToPixels;
 	int32 CountX;
 	int32 CountY;
 	real32 UpperLeftX;
@@ -87,14 +79,8 @@ struct world{
 	tile_map *TileMaps;
 };
 
-
-
 struct game_state{
-	int32 PlayerTileMapX;
-	int32 PlayerTileMapY;
-	
-	real32 PlayerX;
-	real32 PlayerY;
+	canonical_position PlayerPos;
 	
 };
 
