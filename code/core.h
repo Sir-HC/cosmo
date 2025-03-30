@@ -45,18 +45,23 @@ inline game_controller_input *GetController(game_input *Input, int unsigned Cont
 	return(Result);
 }
 
-struct tile_map {
+struct tile_chunk {
 	
 	uint32 *Tiles;
 };
 
-struct canonical_position {
-
-	int32 TileMapX;
-	int32 TileMapY; 
+struct tile_chunk_position {
+	uint32 TileChunkX;
+	uint32 TileChunkY;
 	
-	int32 TileX;
-	int32 TileY;
+	uint32 RelTileX;
+	uint32 RelTileY;
+};
+
+struct world_position {
+	
+	uint32 AbsTileX;
+	uint32 AbsTileY;
 	
 	// x/y from tile
 	real32 X;
@@ -65,22 +70,23 @@ struct canonical_position {
 
 struct world{
 	
+	uint32 ChunkShift;
+	uint32 ChunkMask;
+	uint32 ChunkDim;
+	
 	real32 TileSideInMeters;
 	int32 TileSideInPixels; 
 	real32 MetersToPixels;
-	int32 CountX;
-	int32 CountY;
-	real32 UpperLeftX;
-	real32 UpperLeftY;
 	
-	int32 TileMapCountX;
-	int32 TileMapCountY;
 	
-	tile_map *TileMaps;
+	int32 TileChunkCountX;
+	int32 TileChunkCountY;
+	
+	tile_chunk *TileChunks;
 };
 
 struct game_state{
-	canonical_position PlayerPos;
+	world_position PlayerPos;
 	
 };
 
