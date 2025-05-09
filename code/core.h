@@ -45,42 +45,15 @@ inline game_controller_input *GetController(game_input *Input, int unsigned Cont
 	return(Result);
 }
 
-struct tile_map {
-	
-	uint32 *Tiles;
-};
-
-struct canonical_position {
-
-	int32 TileMapX;
-	int32 TileMapY; 
-	
-	int32 TileX;
-	int32 TileY;
-	
-	// x/y from tile
-	real32 X;
-	real32 Y;
-};
+#include "lynch_intrinsics.h"
+#include "lynch_tile.h"
 
 struct world{
-	
-	real32 TileSideInMeters;
-	int32 TileSideInPixels; 
-	real32 MetersToPixels;
-	int32 CountX;
-	int32 CountY;
-	real32 UpperLeftX;
-	real32 UpperLeftY;
-	
-	int32 TileMapCountX;
-	int32 TileMapCountY;
-	
-	tile_map *TileMaps;
+	tile_map *TileMap;
 };
 
 struct game_state{
-	canonical_position PlayerPos;
+	tile_map_position PlayerPos;
 	
 };
 

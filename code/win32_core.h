@@ -60,11 +60,14 @@ struct win32_replay_buffer{
 struct win32_state{
 	uint64 TotalSize;
 	void *GameMemoryBlock;
+	
 	win32_replay_buffer ReplayBuffers[4];
-	HANDLE RecordHandle;
+	
+	HANDLE RecordingHandle;
 	int InputRecordingIndex;
-	HANDLE PlayRecordHandle;
-	int InputPlayRecordIndex;
+	
+	HANDLE PlaybackHandle;
+	int InputPlayingIndex;
 	
 	
 	char ExeFilePath[WIN32_STATE_FILENAME_COUNT];
