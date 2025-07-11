@@ -32,8 +32,8 @@ struct tile_map{
 	real32 MetersToPixels;
 	
 	
-	int32 TileChunkCountX;
-	int32 TileChunkCountY;
+	uint32 TileChunkCountX;
+	uint32 TileChunkCountY;
 	
 	tile_chunk *TileChunks;
 };
