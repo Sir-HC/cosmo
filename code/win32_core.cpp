@@ -774,9 +774,9 @@ int CALLBACK WinMain(HINSTANCE Instance,
 			GameMemory.PermanentStorageSize = Megabytes(64);
 			GameMemory.TransientStorageSize = Gigabytes(uint64(1));
 			
-			GameMemory.DEBUGPlatformReadEntireFile = 0;
-			GameMemory.DEBUGPlatformFreeFileMemory = 0;
-			GameMemory.DEBUGPlatformWriteEntireFile = 0;
+			GameMemory.DEBUGPlatformFreeFileMemory = DEBUGPlatformFreeFileMemory;
+            GameMemory.DEBUGPlatformReadEntireFile = DEBUGPlatformReadEntireFile;
+            GameMemory.DEBUGPlatformWriteEntireFile = DEBUGPlatformWriteEntireFile;
 			
 			Win32State.TotalSize = GameMemory.PermanentStorageSize + GameMemory.TransientStorageSize;
 

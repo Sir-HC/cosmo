@@ -45,6 +45,8 @@ inline game_controller_input *GetController(game_input *Input, int unsigned Cont
 	return(Result);
 }
 
+
+
 #include "lynch_intrinsics.h"
 #include "lynch_tile.h"
 
@@ -54,14 +56,38 @@ struct memory_arena{
 	memory_index Used;
 };
 
+#define PushStruct(Arena, type) (type *)PushSize_(Arena, sizeof(type))
+#define PushArray(Arena, Count, type) (type *)PushSize_(Arena, (Count)*sizeof(type))
+
+void *
+PushSize_(memory_arena *Arena, memory_index Size){
+	Assert((Arena->Used + Size) <= Arena->Size);
+	void *Result = Arena->Base + Arena->Used;
+	Arena->Used += Size;
+	return(Result);
+}
+
 struct world{
 	tile_map *TileMap;
+};
+
+struct loaded_bitmap{
+	int32 Width;
+	int32 Height;
+	uint32 *Pixels;
 };
 
 struct game_state{
 	memory_arena WorldArena;
 	world *World;
 	tile_map_position PlayerPos;
+	
+	uint32 PixelWidth;
+	uint32 PixelHeight;
+	loaded_bitmap Backdrop;
+	loaded_bitmap HeroHead;
+	loaded_bitmap HeroCape;
+	loaded_bitmap HeroTorso;
 	
 };
 
