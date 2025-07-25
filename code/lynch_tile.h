@@ -4,6 +4,12 @@ struct tile_chunk {
 	uint32 *Tiles;
 };
 
+struct tile_map_difference{
+	v2 dXY;
+	real32 dZ;
+	
+};
+
 struct tile_chunk_position {
 	uint32 TileChunkX;
 	uint32 TileChunkY;
@@ -20,8 +26,7 @@ struct tile_map_position {
 	uint32 AbsTileZ;
 	
 	// x/y from tile
-	real32 X;
-	real32 Y;
+	v2 Offset;
 };
 
 struct tile_map{
@@ -39,4 +44,4 @@ struct tile_map{
 };
 
 #define LYNCH_TILE_H
-#endif
+#endif 

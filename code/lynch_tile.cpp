@@ -12,8 +12,8 @@ inline void RecanonicalizeCoord(tile_map *TileMap, uint32 *Tile, real32 *Rel){
 inline tile_map_position RecanonicalizePosition(tile_map *TileMap, tile_map_position Pos){
 	tile_map_position Result = Pos;
 	
-	RecanonicalizeCoord(TileMap, &Result.AbsTileX, &Result.X);
-	RecanonicalizeCoord(TileMap, &Result.AbsTileY, &Result.Y);
+	RecanonicalizeCoord(TileMap, &Result.AbsTileX, &Result.Offset.X);
+	RecanonicalizeCoord(TileMap, &Result.AbsTileY, &Result.Offset.Y);
 	
 	return(Result);
 }
@@ -96,16 +96,21 @@ internal uint32 GetTileValue(tile_map *TileMap, tile_map_position Pos)
     return(TileVal);
 }
 
+internal bool32 IsTileValueEmpty(uint32 TileValue){
+	bool32 Empty =  (TileValue == 1) || (TileValue == 3) || (TileValue == 4);
+	return(Empty);
+}
+
 internal bool32 AreOnSameTile(tile_map_position *PosA, tile_map_position *PosB){
 	bool32 Res = (PosA->AbsTileX == PosB->AbsTileX) &&
-				(PosA->AbsTileY == PosB->AbsTileY) &&
-				(PosA->AbsTileZ == PosB->AbsTileZ);
+				 (PosA->AbsTileY == PosB->AbsTileY) &&
+				 (PosA->AbsTileZ == PosB->AbsTileZ);
 	return(Res);
 }
 
 internal bool32 IsTileMapPointEmpty(tile_map *TileMap, tile_map_position Pos){
 	uint32 TileValue = GetTileValue(TileMap, Pos.AbsTileX, Pos.AbsTileY, Pos.AbsTileZ);
-	bool32 IsEmpty = (TileValue == 1) || (TileValue == 3) || (TileValue == 4);
+	bool32 IsEmpty = IsTileValueEmpty(TileValue);
 	return IsEmpty;
 }
 
@@ -123,4 +128,24 @@ SetTileValue(memory_arena *Arena, tile_map *TileMap, uint32 AbsTileX, uint32 Abs
 		}
 	}
 	SetTileValue(TileMap, Chunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
+}
+
+inline tile_map_difference Subtract(tile_map *TileMap, tile_map_position *A, tile_map_position *B){
+	tile_map_difference Res;
+	v2 dTileXY = {(real32)A->AbsTileX - (real32)B->AbsTileX, 
+				  (real32)A->AbsTileY - (real32)B->AbsTileY};
+				
+	real32 dTileZ = (real32)A->AbsTileZ - (real32)B->AbsTileZ;
+	
+	Res.dXY = TileMap->TileSideInMeters*dTileXY + (A->Offset - B->Offset);
+	Res.dZ = TileMap->TileSideInMeters*dTileZ;
+	return(Res);
+}
+
+inline tile_map_position CenteredTilePoint(uint32 AbsTileX, uint32 AbsTileY, uint32 AbsTileZ){
+	tile_map_position Res = {};
+	Res.AbsTileX = AbsTileX;
+	Res.AbsTileY = AbsTileY;
+	Res.AbsTileZ = AbsTileZ;
+	return(Res);
 }

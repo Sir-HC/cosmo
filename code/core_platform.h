@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifndef COMPIILER_MSVC
 #define COMPIILER_MSVC 0
@@ -28,6 +29,26 @@ extern "C" {
 #include <intrin.h>
 #endif
 
+#define internal static
+#define local_persist static
+#define global_variable static
+
+#define Pi32 3.14159265
+
+#if PERFORMANCE_SLOW
+#define Assert(Expression) if(!(Expression)) {*(int *)0 = 0;}
+#else
+#define Assert(Expression)
+#endif
+
+
+#define ArrayCount(Array) (sizeof(Array)/ sizeof((Array)[0]))
+
+#define Kilobytes(Value) (Value*1024)
+#define Megabytes(Value) (Kilobytes(Value)*1024)
+#define Gigabytes(Value) (Megabytes(Value)*1024)
+#define Terabytes(Value) (Gigabytes(Value)*1024)
+
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
@@ -43,6 +64,14 @@ typedef size_t memory_index;
 
 typedef float real32;
 typedef double real64;
+
+
+inline uint32
+SafeTruncateUInt64(uint64 Value){
+	Assert(Value <= 0xFFFFFFFF);
+	uint32 Result = (uint32)Value;
+	return(Result);
+}
 
 
 typedef struct game_offscreen_buffer
@@ -97,6 +126,7 @@ typedef struct game_controller_input{
 	};
 } game_controller_input;
 
+
 typedef struct game_input{
 	game_button_state MouseButtons[5];
 	int32 MouseX, MouseY, MouseZ;
@@ -105,6 +135,11 @@ typedef struct game_input{
 	game_controller_input Controllers[4];
 } game_input;
 
+inline game_controller_input *GetController(game_input *Input, int unsigned ControllerIndex){
+	Assert(ControllerIndex < ArrayCount(Input->Controllers));
+	game_controller_input *Result = &Input->Controllers[ControllerIndex];
+	return(Result);
+}
 
 #if CORE_INTERNAL
 typedef struct debug_read_file_result{

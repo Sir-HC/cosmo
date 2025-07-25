@@ -10,43 +10,8 @@
 
 #include "core_platform.h"
 
-#define internal static
-#define local_persist static
-#define global_variable static
 
-#define Pi32 3.14159265
-
-
-#if PERFORMANCE_SLOW
-#define Assert(Expression) if(!(Expression)) {*(int *)0 = 0;}
-#else
-#define Assert(Expression)
-#endif
-
-
-#define ArrayCount(Array) (sizeof(Array)/ sizeof((Array)[0]))
-
-#define Kilobytes(Value) (Value*1024)
-#define Megabytes(Value) (Kilobytes(Value)*1024)
-#define Gigabytes(Value) (Megabytes(Value)*1024)
-#define Terabytes(Value) (Gigabytes(Value)*1024)
-
-
-inline uint32
-SafeTruncateUInt64(uint64 Value){
-	Assert(Value <= 0xFFFFFFFF);
-	uint32 Result = (uint32)Value;
-	return(Result);
-}
-
-inline game_controller_input *GetController(game_input *Input, int unsigned ControllerIndex){
-	Assert(ControllerIndex < ArrayCount(Input->Controllers));
-	game_controller_input *Result = &Input->Controllers[ControllerIndex];
-	return(Result);
-}
-
-
-
+#include "core_math.h"
 #include "lynch_intrinsics.h"
 #include "lynch_tile.h"
 
@@ -77,18 +42,26 @@ struct loaded_bitmap{
 	uint32 *Pixels;
 };
 
+struct hero_bitmaps{
+	int32 AlignX;
+	int32 AlignY;
+	loaded_bitmap Head;
+	loaded_bitmap Cape;
+	loaded_bitmap Torso;
+	
+};
+
 struct game_state{
 	memory_arena WorldArena;
 	world *World;
 	tile_map_position PlayerPos;
+	tile_map_position CameraPos;
+	v2 dPlayerPos;
 	
-	uint32 PixelWidth;
-	uint32 PixelHeight;
+	
 	loaded_bitmap Backdrop;
-	loaded_bitmap HeroHead;
-	loaded_bitmap HeroCape;
-	loaded_bitmap HeroTorso;
-	
+	uint32 HeroFacingDirection;
+	hero_bitmaps HeroBitmaps[4];
 };
 
 #define CORE
