@@ -334,7 +334,7 @@ inline local_entity* ChangeEntityToLocal(game_state *GameState, uint32 ExternalI
 			LocalEntity = GameState->LocalEntities + LocalIndex; 
 			
 			LocalEntity->Pos = CameraSpacePos;
-			LocalEntity->dPos = v2{0,0};
+			LocalEntity->dPos = V2(0,0);
 			LocalEntity->ChunkZ = ExternalEntity->Pos.ChunkZ;
 			LocalEntity->FacingDirection = 0;
 			LocalEntity->ExternalEntityIndex = ExternalIndex;
@@ -507,24 +507,24 @@ internal void MoveEntity(game_state *GameState, entity Entity, real32 dt, v2 ddP
 				if(TestEntity.External->Collidable){
 					real32 DiameterW = TestEntity.External->Width + Entity.External->Width;
 					real32 DiameterH = TestEntity.External->Height + Entity.External->Height;
-					v2 MinCorner = -0.5f * v2{DiameterW, DiameterH};
-					v2 MaxCorner = 0.5f * v2{DiameterW, DiameterH};
+					v2 MinCorner = -0.5f * V2(DiameterW, DiameterH);
+					v2 MaxCorner = 0.5f * V2(DiameterW, DiameterH);
 					
 					v2 Rel = Entity.Local->Pos - TestEntity.Local->Pos;
 					if(TestWall(MinCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y, MinCorner.Y, MaxCorner.Y, &tMin)){
-						WallNormal = v2{-1,0};
+						WallNormal = V2(-1,0);
 						HitLocalEntityIndex = TestEntityIndexLocal;
 					}
 					if(TestWall(MaxCorner.X, Rel.X, Rel.Y, PlayerDelta.X, PlayerDelta.Y, MinCorner.Y, MaxCorner.Y, &tMin)){
-						WallNormal = v2{1, 0};
+						WallNormal = V2(1, 0);
 						HitLocalEntityIndex = TestEntityIndexLocal;
 					}
 					if(TestWall(MinCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X, MinCorner.X, MaxCorner.X, &tMin)){
-						WallNormal = v2{0, -1};
+						WallNormal = V2(0, -1);
 						HitLocalEntityIndex = TestEntityIndexLocal;
 					}
 					if(TestWall(MaxCorner.Y, Rel.Y, Rel.X, PlayerDelta.Y, PlayerDelta.X, MinCorner.X, MaxCorner.X, &tMin)){
-						WallNormal = v2{0, 1};
+						WallNormal = V2(0, 1);
 						HitLocalEntityIndex = TestEntityIndexLocal;
 					}
 				}
@@ -788,7 +788,7 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender){
 			entity ControllingEntity = GetLocalEntity(GameState, ExternalIndex);
 			v2 ddEntity = {};
 			if(Controller->IsAnalog){
-				ddEntity = v2{Controller->StickAverageX, Controller->StickAverageY};
+				ddEntity = V2(Controller->StickAverageX, Controller->StickAverageY);
 			} else {
 				if (Controller->MoveUp.EndedDown){
 					ddEntity.Y = 1.0f;
