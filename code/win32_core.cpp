@@ -549,7 +549,7 @@ internal void Win32ProcessPendingMessages(win32_state *Win32State, game_controll
 						GlobalRunning = false;
 					}
 					else if (VKCode == VK_SPACE) {
-						Win32ProcessKeyboardMessage(&KeyboardController->Back, IsDown);
+						Win32ProcessKeyboardMessage(&KeyboardController->Start, IsDown);
 					}
 					else if (VKCode == 'P'){
 						if(IsDown){

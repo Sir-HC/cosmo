@@ -35,12 +35,17 @@ extern "C" {
 
 #define Pi32 3.14159265
 
+#define Minimum(A, B) ((A < B) ? (A) : (B))
+#define Maximum(A, B) ((A > B) ? (A) : (B)) 
+
+
 #if PERFORMANCE_SLOW
 #define Assert(Expression) if(!(Expression)) {*(int *)0 = 0;}
 #else
 #define Assert(Expression)
 #endif
 
+#define InvalidCodePath Assert(!"InvalidCodePath")
 
 #define ArrayCount(Array) (sizeof(Array)/ sizeof((Array)[0]))
 
